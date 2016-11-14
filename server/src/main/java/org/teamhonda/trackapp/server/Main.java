@@ -9,6 +9,8 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.RoutingHandler;
 import org.bson.Document;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.teamhonda.trackapp.server.json.Tracks;
 
 import java.util.ArrayList;
@@ -18,6 +20,8 @@ import java.util.stream.Collectors;
  * @author Gordon Tyler
  */
 public class Main {
+
+private static Logger logger = LoggerFactory.getLogger(Main.class);
 
 public static void main(String[] args) {
     final Gson gson = new GsonBuilder().create();
@@ -40,7 +44,14 @@ public static void main(String[] args) {
             .addHttpListener(8080, "0.0.0.0", rootHandler)
             .build();
 
-    server.start();
+    try {
+        server.start();
+    }
+    catch (Exception e) {
+        logger.error("Could not start server", e);
+        server.stop();
+        mongo.close();
+    }
 }
 
 }

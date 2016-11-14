@@ -22,11 +22,15 @@ package org.teamhonda.trackapp.server;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.HttpServerExchange;
 import io.undertow.util.StatusCodes;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Gordon Tyler
  */
 public class DispatchHandler implements HttpHandler {
+
+private static Logger logger = LoggerFactory.getLogger(Main.class);
 
 private final HttpHandler mHandler;
 
@@ -45,6 +49,7 @@ public void handleRequest(HttpServerExchange exchange) throws Exception {
         mHandler.handleRequest(exchange);
     }
     catch (Exception e) {
+        logger.error("An error ocurred while handling " + exchange.getRequestMethod() + " " + exchange.getRequestPath(), e);
         exchange.setStatusCode(StatusCodes.INTERNAL_SERVER_ERROR);
         exchange.getResponseSender().send(e.toString());
     }
