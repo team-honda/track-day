@@ -43,8 +43,16 @@ public static void main(String[] args) {
 
             }));
 
+    String serverHost = System.getenv("TRACKAPP_SERVER_HOST");
+    if (serverHost == null) serverHost = "0.0.0.0";
+
+    int serverPort = 8080;
+    if (System.getenv().containsKey("TRACKAPP_SERVER_PORT")) {
+        serverPort = Integer.parseInt(System.getenv("TRACKAPP_SERVER_PORT"));
+    }
+
     final Undertow server = Undertow.builder()
-            .addHttpListener(8080, "0.0.0.0", rootHandler)
+            .addHttpListener(serverPort, serverHost, rootHandler)
             .build();
 
     try {
