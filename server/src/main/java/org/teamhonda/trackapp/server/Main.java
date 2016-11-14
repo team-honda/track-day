@@ -25,7 +25,10 @@ private static Logger logger = LoggerFactory.getLogger(Main.class);
 
 public static void main(String[] args) {
     final Gson gson = new GsonBuilder().create();
-    final MongoClient mongo = new MongoClient("192.168.99.100");
+
+    String mongoHost = System.getenv("MONGO_HOST");
+    if (mongoHost == null) mongoHost = "localhost";
+    final MongoClient mongo = new MongoClient(mongoHost);
     final MongoDatabase db = mongo.getDatabase("trackapp");
 
     RoutingHandler rootHandler = Handlers.routing()
