@@ -3,25 +3,31 @@ package org.teamhonda.trackapp.server;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mongodb.MongoClient;
-import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.RoutingHandler;
+import io.undertow.util.Headers;
 import org.bson.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.teamhonda.trackapp.server.json.Tracks;
+import org.teamhonda.trackapp.server.json.Event;
 
-import java.util.ArrayList;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.mongodb.client.model.Filters.in;
 
 /**
  * @author Gordon Tyler
  */
 public class Main {
 
-private static Logger logger = LoggerFactory.getLogger(Main.class);
+private static final Logger logger = LoggerFactory.getLogger(Main.class);
+private static final Charset UTF8 = StandardCharsets.UTF_8;
+private static final String CONTENT_TYPE_JSON = "application/json;charset=UTF-8";
 
 public static void main(String[] args) {
     final Gson gson = new GsonBuilder().create();
@@ -32,15 +38,24 @@ public static void main(String[] args) {
     final MongoDatabase db = mongo.getDatabase("trackapp");
 
     RoutingHandler rootHandler = Handlers.routing()
-            .get("/tracks", new DispatchHandler(exchange -> {
-                MongoCollection<Document> coll = db.getCollection("tracks");
-                ArrayList<Document> docs = coll.find().into(new ArrayList<>());
-                Tracks result = new Tracks(docs.stream()
-                        .map(d -> d.getString("name"))
-                        .collect(Collectors.toList()));
+            .get("/events", new DispatchHandler(exchange -> {
+                ArrayList<Document> eventDocs = db.getCollection("events").find().into(new ArrayList<>());
+                Set<String> trackNames = eventDocs.stream()
+                        .map(d -> d.getString("track"))
+                        .distinct()
+                        .collect(Collectors.toSet());
+                Map<String,Document> trackDocs = db.getCollection("tracks")
+                        .find(in("name", trackNames))
+                        .into(new ArrayList<>())
+                        .stream()
+                        .collect(Collectors.toMap(d -> d.getString("name"), d -> d));
 
-                exchange.getResponseSender().send(gson.toJson(result));
+                List<Event> results = eventDocs.stream()
+                        .map(ed -> Event.fromDocs(ed, trackDocs.get(ed.getString("track"))))
+                        .collect(Collectors.toList());
 
+                exchange.getResponseHeaders().add(Headers.CONTENT_TYPE, CONTENT_TYPE_JSON);
+                exchange.getResponseSender().send(gson.toJson(results), UTF8);
             }));
 
     String serverHost = System.getenv("TRACKAPP_SERVER_HOST");
