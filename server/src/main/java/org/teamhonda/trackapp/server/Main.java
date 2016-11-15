@@ -8,15 +8,18 @@ import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.RoutingHandler;
 import io.undertow.util.Headers;
+import io.undertow.util.StatusCodes;
 import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamhonda.trackapp.server.json.Event;
+import org.teamhonda.trackapp.server.scrapers.Scrapers;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static com.mongodb.client.model.Filters.*;
@@ -37,6 +40,8 @@ public static void main(String[] args) {
     if (mongoHost == null) mongoHost = "localhost";
     final MongoClient mongo = new MongoClient(mongoHost);
     final MongoDatabase db = mongo.getDatabase("trackapp");
+
+    final AtomicBoolean scraping = new AtomicBoolean(false);
 
     RoutingHandler rootHandler = Handlers.routing()
             .get("/events", new DispatchHandler(exchange -> {
@@ -76,6 +81,20 @@ public static void main(String[] args) {
 
                 exchange.getResponseHeaders().add(Headers.CONTENT_TYPE, CONTENT_TYPE_JSON);
                 exchange.getResponseSender().send(gson.toJson(results), UTF8);
+            }))
+            .post("/scrape", new DispatchHandler(exchange -> {
+                if (scraping.compareAndSet(false, true)) {
+                    try {
+                        Scrapers.scrapeAll(db.getCollection("events"));
+                    }
+                    finally {
+                        scraping.compareAndSet(true, false);
+                    }
+                }
+                else {
+                    exchange.setStatusCode(StatusCodes.BAD_REQUEST);
+                    exchange.getResponseSender().send("{\"error\":\"scraping already running\"}");
+                }
             }));
 
     String serverHost = System.getenv("TRACKAPP_SERVER_HOST");
