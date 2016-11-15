@@ -9,6 +9,7 @@ import io.undertow.Undertow;
 import io.undertow.server.RoutingHandler;
 import io.undertow.util.Headers;
 import org.bson.Document;
+import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.teamhonda.trackapp.server.json.Event;
@@ -18,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.mongodb.client.model.Filters.in;
+import static com.mongodb.client.model.Filters.*;
 
 /**
  * @author Gordon Tyler
@@ -39,8 +40,25 @@ public static void main(String[] args) {
 
     RoutingHandler rootHandler = Handlers.routing()
             .get("/events", new DispatchHandler(exchange -> {
+                Map<String, Deque<String>> qp = exchange.getQueryParameters();
+
+                Bson eventsFilter = new Document(); // no filter
+                if (qp.containsKey("start") && qp.containsKey("end")) {
+                    eventsFilter = and(
+                            gte("date", qp.get("start").getFirst()),
+                            lte("date", qp.get("end").getFirst())
+                    );
+                }
+                else if (qp.containsKey("start")) {
+                    eventsFilter = gte("date", qp.get("start").getFirst());
+                }
+                else if (qp.containsKey("end")) {
+                    eventsFilter = lte("date", qp.get("end").getFirst());
+                }
+
                 ArrayList<Document> eventDocs = db.getCollection("events")
                         .find()
+                        .filter(eventsFilter)
                         .into(new ArrayList<>());
                 Set<String> trackNames = eventDocs.stream()
                         .map(d -> d.getString("track"))
