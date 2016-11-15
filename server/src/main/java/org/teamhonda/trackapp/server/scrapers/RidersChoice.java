@@ -20,10 +20,16 @@ public class RidersChoice implements Scraper {
 private static final String NAME = "Riders Choice";
 private static final String URL = "http://riderschoice.ca/track-day";
 private static final Pattern RE_YEAR = Pattern.compile("([0-9]{4}) TRACK DAY SCHEDULE");
-private static final ThreadLocal<DateFormat> DATE_FORMAT = new ThreadLocal<DateFormat>() {
+private static final ThreadLocal<DateFormat> PARSE_DATE_FORMAT = new ThreadLocal<DateFormat>() {
     @Override
     protected DateFormat initialValue() {
         return new SimpleDateFormat("MMM dd");
+    }
+};
+private static final ThreadLocal<DateFormat> OUTPUT_DATE_FORMAT = new ThreadLocal<DateFormat>() {
+    @Override
+    protected DateFormat initialValue() {
+        return new SimpleDateFormat("YYYY-MM-dd");
     }
 };
 
@@ -73,8 +79,9 @@ private int extractYear(Element schedule) {
 
 private String normalizeDate(String date, int year) {
     try {
-        Date d = DATE_FORMAT.get().parse(date);
-        return "" + year + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+        Date d = PARSE_DATE_FORMAT.get().parse(date);
+        d.setYear(year - 1900);
+        return OUTPUT_DATE_FORMAT.get().format(d);
     }
     catch (ParseException e) {
         throw new RuntimeException(e);
