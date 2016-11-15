@@ -1,8 +1,13 @@
 package org.teamhonda.trackapp;
 
+import android.Manifest.permission;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
@@ -15,6 +20,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
+    public static final int PERMISSIONS_REQUEST_READ_CALENDAR = 1;
+
     private CalendarMonthView view;
 
     @Override
@@ -42,6 +49,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void initializeCalendar() {
+        if (ContextCompat.checkSelfPermission(getBaseContext(), permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission.READ_CALENDAR)) {
+                // TODO: show request
+            }
+            else {
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{permission.READ_CALENDAR},
+                        PERMISSIONS_REQUEST_READ_CALENDAR);
+            }
+        }
+
         view.setCaldroidListener(new CaldroidListener() {
             @Override
             public void onSelectDate(Date date, View view) {
@@ -60,13 +78,45 @@ public class MainActivity extends AppCompatActivity {
                 cal.set(Calendar.MONTH, month - 2);
                 Date start = cal.getTime();
 
-                UserCalendarHelper c = new UserCalendarHelper();
-                c.getCalendarData(getBaseContext(), start, end);
                 ServerAdapter b = new ServerAdapter();
                 b.getEventData(start, end);
 
                 Toast.makeText(getApplicationContext(), start.toString() + " - " + end.toString(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissions[], @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSIONS_REQUEST_READ_CALENDAR: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                    int year = view.getYear();
+                    int month = view.getMonth();
+
+                    Calendar cal = Calendar.getInstance();
+                    cal.set(Calendar.YEAR, year);
+                    cal.set(Calendar.MONTH, month);
+                    cal.set(Calendar.DAY_OF_MONTH, 15);
+                    Date end = cal.getTime();
+                    cal.set(Calendar.MONTH, month - 2);
+                    Date start = cal.getTime();
+
+                    UserCalendarHelper c = new UserCalendarHelper();
+                    c.getCalendarData(getBaseContext(), start, end);
+
+                } else {
+
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 }
