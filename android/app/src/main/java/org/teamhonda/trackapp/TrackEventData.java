@@ -31,7 +31,7 @@ public class TrackEventData implements TimeBasedEvent {
     }
 
     public Date getEnd() {
-        return getStart();
+        return new Date(getStart().getTime() + 1);
     }
 
     public String getTrack() {

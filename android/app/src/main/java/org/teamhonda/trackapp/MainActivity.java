@@ -96,16 +96,15 @@ public class MainActivity extends AppCompatActivity {
 
                 Map<String, List<TimeBasedEvent>> userSchedule = new HashMap<>();
                 Map<String, List<TimeBasedEvent>> trackSchedule = new HashMap<>();
-
-                addEventsToCalendar(userEventData, Color.BLUE, Collections.<String, List<TimeBasedEvent>>emptyMap(), userSchedule);
+                addEventsToCalendar(userEventData, getResources().getColor(R.color.caldroid_sky_blue), Collections.<String, List<TimeBasedEvent>>emptyMap(), userSchedule);
                 addEventsToCalendar(trackEventData, getResources().getColor(R.color.green), userSchedule, trackSchedule);
             }
 
             private void addEventsToCalendar(List<? extends TimeBasedEvent> events, int clr, Map<String, List<TimeBasedEvent>> readSchedule, Map<String, List<TimeBasedEvent>> writeSchedule) {
                 for (TimeBasedEvent event : events) {
                     Calendar cal2 = Calendar.getInstance();
-                    cal2.setTime(event.getStart());
-                    Date curr = cal2.getTime();
+                    Date curr = event.getStart();
+                    cal2.setTime(curr);
                     while (curr.before(event.getEnd())) {
                         String date = SDF.format(curr);
                         List<TimeBasedEvent> dayEvents = writeSchedule.get(date);
