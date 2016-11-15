@@ -9,7 +9,8 @@
         android:id="@+id/calendar"
         android:layout_margin="10dp"
         android:layout_width="match_parent"
-        android:layout_height="386dp" />
+        android:layout_height="386dp"
+        android:orientation="horizontal" />
 
     <LinearLayout
         android:orientation="vertical"
