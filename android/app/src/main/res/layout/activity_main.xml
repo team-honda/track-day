@@ -7,10 +7,10 @@
 
     <RelativeLayout
         android:id="@+id/calendar"
-        android:layout_margin="10dp"
         android:layout_width="match_parent"
-        android:layout_height="347dp"
-        android:orientation="horizontal" />
+        android:layout_height="370dp"
+        android:orientation="horizontal"
+        android:background="@color/background_material_light"/>
 
     <RelativeLayout
         android:orientation="vertical"
@@ -18,8 +18,9 @@
         android:layout_height="match_parent">
 
         <TextView
+            android:id="@+id/textView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/textView"/>
+            android:background="@color/background_material_light"/>
     </RelativeLayout>
 </LinearLayout>
