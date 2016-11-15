@@ -32,14 +32,14 @@ public class MainActivity extends AppCompatActivity {
     public static final int PERMISSIONS_REQUEST_READ_CALENDAR = 1;
 
     private boolean readCalendarPermissionGranted = false;
-    private CaldroidFragment view;
+    private CalendarMonthView view;
     public static final SimpleDateFormat SDF = new SimpleDateFormat("MMdd", Locale.US);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        view = new CaldroidFragment();
+        view = new CalendarMonthView();
 
         Bundle args = new Bundle();
         Calendar cal = Calendar.getInstance();

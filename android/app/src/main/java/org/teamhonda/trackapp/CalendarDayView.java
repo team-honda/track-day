@@ -35,6 +35,7 @@ public class CalendarDayView extends CaldroidGridAdapter {
 
         // Set color of the dates in previous / next month
         TextView dateField = (TextView) cellView.findViewById(R.id.tv1);
+        TextView iconField = (TextView) cellView.findViewById(R.id.tv2);
         dateField.setTextColor(dateTime.getMonth() != month ? Color.LTGRAY : Color.BLACK);
 
         boolean shouldResetDisabledView = false;
@@ -69,6 +70,7 @@ public class CalendarDayView extends CaldroidGridAdapter {
         }
 
         dateField.setText(String.format("%s", dateTime.getDay()));
+        iconField.setText("i");
 
         // Somehow after setBackgroundResource, the padding collapse.
         // This is to recover the padding
