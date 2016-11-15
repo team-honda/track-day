@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class EventData {
+public class TrackEventData implements TimeBasedEvent {
     private final SimpleDateFormat dateFmt = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
 
     private String date;
@@ -22,12 +22,16 @@ public class EventData {
     private boolean registered;
     private String notes;
 
-    public Date getDate() {
+    public Date getStart() {
         try {
             return dateFmt.parse(date);
         } catch (ParseException e) {
             throw new IllegalArgumentException("Can't parse date " + date, e);
         }
+    }
+
+    public Date getEnd() {
+        return getStart();
     }
 
     public String getTrack() {

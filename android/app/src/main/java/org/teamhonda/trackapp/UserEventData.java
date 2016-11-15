@@ -2,7 +2,7 @@ package org.teamhonda.trackapp;
 
 import java.util.Date;
 
-public class UserCalendarData {
+public class UserEventData implements TimeBasedEvent {
     private String title;
     private String description;
     private Date start;
@@ -10,7 +10,7 @@ public class UserCalendarData {
     private String timezone;
     private String location;
 
-    public UserCalendarData(String title, String description, Date start, Date end, String timezone, String location) {
+    public UserEventData(String title, String description, Date start, Date end, String timezone, String location) {
         this.title = title;
         this.description = description;
         this.start = start;

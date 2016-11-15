@@ -2,6 +2,7 @@ package org.teamhonda.trackapp;
 
 import android.Manifest.permission;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -17,19 +18,28 @@ import android.widget.Toast;
 import com.roomorama.caldroid.CaldroidFragment;
 import com.roomorama.caldroid.CaldroidListener;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
     public static final int PERMISSIONS_REQUEST_READ_CALENDAR = 1;
 
-    private CalendarMonthView view;
+    private boolean readCalendarPermissionGranted = false;
+    private CaldroidFragment view;
+    public static final SimpleDateFormat SDF = new SimpleDateFormat("MMdd", Locale.US);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        view = new CalendarMonthView();
+        view = new CaldroidFragment();
 
         Bundle args = new Bundle();
         Calendar cal = Calendar.getInstance();
@@ -41,10 +51,6 @@ public class MainActivity extends AppCompatActivity {
         t.replace(R.id.calendar, view);
         t.commit();
 
-        ColorDrawable blue = new ColorDrawable(getResources().getColor(R.color.green));
-        view.setBackgroundDrawableForDate(blue, Calendar.getInstance().getTime());
-
-
         setContentView(R.layout.activity_main);
         initializeCalendar();
     }
@@ -52,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     public void initializeCalendar() {
         if (ContextCompat.checkSelfPermission(getBaseContext(), permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission.READ_CALENDAR)) {
-                Log.e(getPackageName(), "Must show reationale for requesting permission");
+                Log.e(getPackageName(), "Must show rationale for requesting permission");
             }
             else {
                 ActivityCompat.requestPermissions(MainActivity.this,
@@ -61,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
         else {
-            fetchUserCalendarData();
+            readCalendarPermissionGranted = true;
         }
 
         view.setCaldroidListener(new CaldroidListener() {
@@ -74,6 +80,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onChangeMonth(int month, int year) {
+                // We display a 6-week calendar so make the window larger than just the current month
                 Calendar cal = Calendar.getInstance();
                 cal.set(Calendar.YEAR, year);
                 cal.set(Calendar.MONTH, month);
@@ -82,10 +89,37 @@ public class MainActivity extends AppCompatActivity {
                 cal.set(Calendar.MONTH, month - 2);
                 Date start = cal.getTime();
 
-                ServerAdapter b = new ServerAdapter();
-                b.getEventData(start, end);
+                Toast.makeText(getApplicationContext(), start + " - " + end, Toast.LENGTH_SHORT).show();
 
-                Toast.makeText(getApplicationContext(), start.toString() + " - " + end.toString(), Toast.LENGTH_SHORT).show();
+                List<? extends TimeBasedEvent> userEventData = readCalendarPermissionGranted ? new UserEventHelper().getCalendarData(getBaseContext(), start, end) : Collections.<TimeBasedEvent>emptyList();
+                List<? extends TimeBasedEvent> trackEventData = new TrackServerAdapter().getEventData(start, end);
+
+                Map<String, List<TimeBasedEvent>> userSchedule = new HashMap<>();
+                Map<String, List<TimeBasedEvent>> trackSchedule = new HashMap<>();
+
+                addEventsToCalendar(userEventData, Color.BLUE, Collections.<String, List<TimeBasedEvent>>emptyMap(), userSchedule);
+                addEventsToCalendar(trackEventData, getResources().getColor(R.color.green), userSchedule, trackSchedule);
+            }
+
+            private void addEventsToCalendar(List<? extends TimeBasedEvent> events, int clr, Map<String, List<TimeBasedEvent>> readSchedule, Map<String, List<TimeBasedEvent>> writeSchedule) {
+                for (TimeBasedEvent event : events) {
+                    Calendar cal2 = Calendar.getInstance();
+                    cal2.setTime(event.getStart());
+                    Date curr = cal2.getTime();
+                    while (curr.before(event.getEnd())) {
+                        String date = SDF.format(curr);
+                        List<TimeBasedEvent> dayEvents = writeSchedule.get(date);
+                        if (dayEvents == null) {
+                            dayEvents = new ArrayList<>();
+                            writeSchedule.put(date, dayEvents);
+                        }
+                        dayEvents.add(event);
+                        boolean conflict = readSchedule.containsKey(date);
+                        view.setBackgroundDrawableForDate(new ColorDrawable(conflict ? Color.RED : clr), curr);
+                        cal2.add(Calendar.DATE, 1);
+                        curr = cal2.getTime();
+                    }
+                }
             }
         });
     }
@@ -96,11 +130,8 @@ public class MainActivity extends AppCompatActivity {
             case PERMISSIONS_REQUEST_READ_CALENDAR: {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-                    fetchUserCalendarData();
-
+                    readCalendarPermissionGranted = true;
                 } else {
-
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
@@ -110,23 +141,5 @@ public class MainActivity extends AppCompatActivity {
             // other 'case' lines to check for other
             // permissions this app might request
         }
-    }
-
-    private void fetchUserCalendarData() {
-        Log.i(this.getPackageName(), "Fetching user calendar data");
-
-        int year = view.getYear();
-        int month = view.getMonth();
-
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month);
-        cal.set(Calendar.DAY_OF_MONTH, 15);
-        Date end = cal.getTime();
-        cal.set(Calendar.MONTH, month - 2);
-        Date start = cal.getTime();
-
-        UserCalendarHelper c = new UserCalendarHelper();
-        c.getCalendarData(getBaseContext(), start, end);
     }
 }

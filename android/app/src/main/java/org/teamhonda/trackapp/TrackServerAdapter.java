@@ -1,11 +1,15 @@
 package org.teamhonda.trackapp;
 
+import android.util.Log;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
-public class ServerAdapter {
+public class TrackServerAdapter {
     private final Gson GSON = new GsonBuilder().disableHtmlEscaping().create();
 
     // TODO replace with actual read from REST interface
@@ -36,7 +40,8 @@ public class ServerAdapter {
                 "}]";
     }
 
-    public EventData[] getEventData(Date from, Date to) {
-        return GSON.fromJson(readJson(), EventData[].class);
+    public List<TrackEventData> getEventData(Date from, Date to) {
+        Log.i(TrackServerAdapter.class.getName(), "Fetching track event data");
+        return Arrays.asList(GSON.fromJson(readJson(), TrackEventData[].class));
     }
 }

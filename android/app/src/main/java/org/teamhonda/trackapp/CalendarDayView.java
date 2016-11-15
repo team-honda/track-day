@@ -16,40 +16,28 @@ import java.util.Map;
 import hirondelle.date4j.DateTime;
 
 public class CalendarDayView extends CaldroidGridAdapter {
+    public static String SCHEDULE = "schedule";
+
+    private final Schedule schedule;
+
     public CalendarDayView(Context context, int month, int year, Map<String, Object> caldroidData, Map<String, Object> extraData) {
         super(context, month, year, caldroidData, extraData);
+        schedule = (Schedule) extraData.get(SCHEDULE);
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        View cellView = convertView;
-
-        // For reuse
-        if (convertView == null) {
-            cellView = inflater.inflate(R.layout.custom_cell, null);
-        }
-
-        int topPadding = cellView.getPaddingTop();
-        int leftPadding = cellView.getPaddingLeft();
-        int bottomPadding = cellView.getPaddingBottom();
-        int rightPadding = cellView.getPaddingRight();
-
-        TextView tv1 = (TextView) cellView.findViewById(R.id.tv1);
-        TextView tv2 = (TextView) cellView.findViewById(R.id.tv2);
-
-        tv1.setTextColor(Color.BLACK);
+        View cellView = convertView != null ? convertView : inflater.inflate(R.layout.custom_cell, null);
 
         // Get dateTime of this cell
-        DateTime dateTime = this.datetimeList.get(position);
-        Resources resources = context.getResources();
+        DateTime dateTime = datetimeList.get(position);
 
         // Set color of the dates in previous / next month
-        if (dateTime.getMonth() != month) {
-            tv1.setTextColor(resources.getColor(com.caldroid.R.color.caldroid_darker_gray));
-        }
+        TextView dateField = (TextView) cellView.findViewById(R.id.tv1);
+        dateField.setTextColor(dateTime.getMonth() != month ? Color.LTGRAY : Color.BLACK);
 
-        boolean shouldResetDiabledView = false;
+        boolean shouldResetDisabledView = false;
         boolean shouldResetSelectedView = false;
 
         // Customize for disabled dates and date outside min/max dates
@@ -57,50 +45,37 @@ public class CalendarDayView extends CaldroidGridAdapter {
                 || (maxDateTime != null && dateTime.gt(maxDateTime))
                 || (disableDates != null && disableDates.indexOf(dateTime) != -1)) {
 
-            tv1.setTextColor(CaldroidFragment.disabledTextColor);
-            if (CaldroidFragment.disabledBackgroundDrawable == -1) {
-                cellView.setBackgroundResource(com.caldroid.R.drawable.disable_cell);
-            } else {
-                cellView.setBackgroundResource(CaldroidFragment.disabledBackgroundDrawable);
-            }
+            dateField.setTextColor(CaldroidFragment.disabledTextColor);
+            cellView.setBackgroundResource(CaldroidFragment.disabledBackgroundDrawable == -1 ? com.caldroid.R.drawable.disable_cell : CaldroidFragment.disabledBackgroundDrawable);
 
             if (dateTime.equals(getToday())) {
                 cellView.setBackgroundResource(com.caldroid.R.drawable.red_border_gray_bg);
             }
-
         } else {
-            shouldResetDiabledView = true;
+            shouldResetDisabledView = true;
         }
 
         // Customize for selected dates
         if (selectedDates != null && selectedDates.indexOf(dateTime) != -1) {
             cellView.setBackgroundColor(resources.getColor(com.caldroid.R.color.caldroid_sky_blue));
-            tv1.setTextColor(Color.BLACK);
-
+            dateField.setTextColor(Color.BLACK);
         } else {
             shouldResetSelectedView = true;
         }
 
-        if (shouldResetDiabledView && shouldResetSelectedView) {
+        if (shouldResetDisabledView && shouldResetSelectedView) {
             // Customize for today
-            if (dateTime.equals(getToday())) {
-                cellView.setBackgroundResource(com.caldroid.R.drawable.red_border);
-            } else {
-                cellView.setBackgroundResource(com.caldroid.R.drawable.cell_bg);
-            }
+            cellView.setBackgroundResource(dateTime.equals(getToday()) ? com.caldroid.R.drawable.red_border : com.caldroid.R.drawable.cell_bg);
         }
 
-        tv1.setText(dateTime.getDay().toString());
-        if (position == 20) {
-            tv2.setText("E");
-        }
+        dateField.setText(String.format("%s", dateTime.getDay()));
 
         // Somehow after setBackgroundResource, the padding collapse.
         // This is to recover the padding
-        cellView.setPadding(leftPadding, topPadding, rightPadding, bottomPadding);
+        cellView.setPadding(cellView.getPaddingLeft(), cellView.getPaddingTop(), cellView.getPaddingRight(), cellView.getPaddingBottom());
 
         // Set custom color if required
-        setCustomResources(dateTime, cellView, tv1);
+        setCustomResources(dateTime, cellView, dateField);
 
         return cellView;
     }
