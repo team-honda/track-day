@@ -22,6 +22,18 @@ Then start the Mongo DB container:
 
     docker run --name mongo -d -p 27017:27017 mongo
 
+#### Importing test data-sets into Mongo DB
+
+The `mongoimport` command can be used with the JSON files in `src/test/mongo/datasets` to import some data for testing purposes. The command looks something like this:
+
+    mongoimport --host=$MONGO_HOST --db=trackapp --collection=events --jsonArray < src/test/mongo/datasets/events.json
+
+If you're running Mongo DB in Docker, you can run this command in the Mongo DB container using Docker:
+
+     docker exec -i mongo sh -c 'mongoimport --db=trackapp --collection=events --jsonArray' < src/test/mongo/datasets/events.json
+
+_IMPORTANT:_ Mongo DB doesn't use traditional table schema with primary keys, so running the import command multiple times will create duplicate objects in the collection. If you want to clear the collection before importing the data, add the `--drop` option.
+
 ### Building
 
     gradlew build
