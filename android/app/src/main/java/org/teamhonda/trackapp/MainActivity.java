@@ -59,6 +59,10 @@ public class MainActivity extends AppCompatActivity {
                 Date end = cal.getTime();
                 cal.set(Calendar.MONTH, month - 2);
                 Date start = cal.getTime();
+
+                ServerAdapter b = new ServerAdapter();
+                b.getEventData(start, end);
+
                 Toast.makeText(getApplicationContext(), start.toString() + " - " + end.toString(), Toast.LENGTH_SHORT).show();
             }
         });
