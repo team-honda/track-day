@@ -39,7 +39,9 @@ public static void main(String[] args) {
 
     RoutingHandler rootHandler = Handlers.routing()
             .get("/events", new DispatchHandler(exchange -> {
-                ArrayList<Document> eventDocs = db.getCollection("events").find().into(new ArrayList<>());
+                ArrayList<Document> eventDocs = db.getCollection("events")
+                        .find()
+                        .into(new ArrayList<>());
                 Set<String> trackNames = eventDocs.stream()
                         .map(d -> d.getString("track"))
                         .distinct()
