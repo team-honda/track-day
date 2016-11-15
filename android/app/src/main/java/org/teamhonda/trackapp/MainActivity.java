@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
                 cal.set(Calendar.MONTH, month - 2);
                 Date start = cal.getTime();
 
+                UserCalendarHelper c = new UserCalendarHelper();
+                c.getCalendarData(getBaseContext(), start, end);
                 ServerAdapter b = new ServerAdapter();
                 b.getEventData(start, end);
 

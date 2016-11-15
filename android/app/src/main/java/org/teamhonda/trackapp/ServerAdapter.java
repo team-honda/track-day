@@ -39,5 +39,4 @@ public class ServerAdapter {
     public EventData[] getEventData(Date from, Date to) {
         return GSON.fromJson(readJson(), EventData[].class);
     }
-
 }
