@@ -1,0 +1,64 @@
+[
+  {
+    "organizer": "SOAR",
+    "organizer_url": "http://www.soaracing.ca/html/schedule.html",
+    "name": "SOAR Practice Weekend",
+    "date": "2016-05-07",
+    "track": "Grand Bend Raceway",
+    "layout": "Four Configurations, To be determined"
+  },
+  {
+    "organizer": "SOAR",
+    "organizer_url": "http://www.soaracing.ca/html/schedule.html",
+    "name": "Round One",
+    "date": "2016-05-27",
+    "track": "Grand Bend Raceway",
+    "layout": "Long Track",
+    "event_url": "http://www.soaracing.ca/html/round_1.html"
+  },
+  {
+    "organizer": "SOAR",
+    "organizer_url": "http://www.soaracing.ca/html/schedule.html",
+    "name": "Round Two",
+    "date": "2016-06-17",
+    "track": "Grand Bend Raceway",
+    "layout": "Modified",
+    "event_url": "http://www.soaracing.ca/html/round_2.html"
+  },
+  {
+    "organizer": "SOAR",
+    "organizer_url": "http://www.soaracing.ca/html/schedule.html",
+    "name": "Round Three",
+    "date": "2016-07-22",
+    "track": "Grand Bend Raceway",
+    "layout": "Reverse Technical",
+    "event_url": "http://www.soaracing.ca/html/round_3.html"
+  },
+  {
+    "organizer": "SOAR",
+    "organizer_url": "http://www.soaracing.ca/html/schedule.html",
+    "name": "Round Four",
+    "date": "2016-08-26",
+    "track": "Grand Bend Raceway",
+    "layout": "Screaming Alien",
+    "event_url": "http://www.soaracing.ca/html/round_4.html"
+  },
+  {
+    "organizer": "SOAR",
+    "organizer_url": "http://www.soaracing.ca/html/schedule.html",
+    "name": "Round Five",
+    "date": "2016-09-09",
+    "track": "Grand Bend Raceway",
+    "layout": "Technical",
+    "event_url": "http://www.soaracing.ca/html/round_5.html"
+  },
+  {
+    "organizer": "SOAR",
+    "organizer_url": "http://www.soaracing.ca/html/schedule.html",
+    "name": "Round Six",
+    "date": "2016-09-30",
+    "track": "Grand Bend Raceway",
+    "layout": "Reverse Screaming Alien",
+    "event_url": "http://www.soaracing.ca/html/round_6.html"
+  }
+]
