@@ -9,6 +9,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -51,13 +52,16 @@ public class MainActivity extends AppCompatActivity {
     public void initializeCalendar() {
         if (ContextCompat.checkSelfPermission(getBaseContext(), permission.READ_CALENDAR) != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(MainActivity.this, permission.READ_CALENDAR)) {
-                // TODO: show request
+                Log.e(getPackageName(), "Must show reationale for requesting permission");
             }
             else {
                 ActivityCompat.requestPermissions(MainActivity.this,
                         new String[]{permission.READ_CALENDAR},
                         PERMISSIONS_REQUEST_READ_CALENDAR);
             }
+        }
+        else {
+            fetchUserCalendarData();
         }
 
         view.setCaldroidListener(new CaldroidListener() {
@@ -93,19 +97,7 @@ public class MainActivity extends AppCompatActivity {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                    int year = view.getYear();
-                    int month = view.getMonth();
-
-                    Calendar cal = Calendar.getInstance();
-                    cal.set(Calendar.YEAR, year);
-                    cal.set(Calendar.MONTH, month);
-                    cal.set(Calendar.DAY_OF_MONTH, 15);
-                    Date end = cal.getTime();
-                    cal.set(Calendar.MONTH, month - 2);
-                    Date start = cal.getTime();
-
-                    UserCalendarHelper c = new UserCalendarHelper();
-                    c.getCalendarData(getBaseContext(), start, end);
+                    fetchUserCalendarData();
 
                 } else {
 
@@ -118,5 +110,23 @@ public class MainActivity extends AppCompatActivity {
             // other 'case' lines to check for other
             // permissions this app might request
         }
+    }
+
+    private void fetchUserCalendarData() {
+        Log.i(this.getPackageName(), "Fetching user calendar data");
+
+        int year = view.getYear();
+        int month = view.getMonth();
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.YEAR, year);
+        cal.set(Calendar.MONTH, month);
+        cal.set(Calendar.DAY_OF_MONTH, 15);
+        Date end = cal.getTime();
+        cal.set(Calendar.MONTH, month - 2);
+        Date start = cal.getTime();
+
+        UserCalendarHelper c = new UserCalendarHelper();
+        c.getCalendarData(getBaseContext(), start, end);
     }
 }
