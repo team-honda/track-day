@@ -1,4 +1,4 @@
-package org.teamhonda.trackapp.server.json;
+package org.teamhonda.trackapp.server.json.rest;
 
 import org.bson.Document;
 

@@ -2,8 +2,11 @@ package org.teamhonda.trackapp.server;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
 import com.mongodb.MongoClient;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.*;
 import io.undertow.Handlers;
 import io.undertow.Undertow;
 import io.undertow.server.RoutingHandler;
@@ -13,9 +16,11 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.teamhonda.trackapp.server.json.Event;
+import org.teamhonda.trackapp.server.json.Track;
+import org.teamhonda.trackapp.server.json.rest.Event;
 import org.teamhonda.trackapp.server.scrapers.Scrapers;
 
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
@@ -40,6 +45,16 @@ public static void main(String[] args) {
     if (mongoHost == null) mongoHost = "localhost";
     final MongoClient mongo = new MongoClient(mongoHost);
     final MongoDatabase db = mongo.getDatabase("trackapp");
+
+    logger.info("Loading static data into database");
+    try {
+        loadTracks(gson, db.getCollection("tracks"));
+    }
+    catch (IOException e) {
+        logger.error("Could not load static data into database", e);
+        mongo.close();
+        System.exit(1);
+    }
 
     final AtomicBoolean scraping = new AtomicBoolean(false);
 
@@ -117,6 +132,31 @@ public static void main(String[] args) {
         server.stop();
         mongo.close();
     }
+}
+
+private static void loadTracks(Gson gson, MongoCollection<Document> trackColl) throws IOException {
+    InputStream jsonStream = Main.class.getResourceAsStream("/datasets/tracks.json");
+
+    List<Document> docs = new ArrayList<>();
+
+    Track[] tracks = gson.fromJson(new InputStreamReader(jsonStream, UTF8), Track[].class);
+    for (Track track : tracks) {
+        docs.add(new Document()
+                .append("name", track.name)
+                .append("latitude", track.latitude)
+                .append("longitude", track.longitude)
+                .append("url", track.url)
+        );
+    }
+
+    trackColl.bulkWrite(docs.stream()
+                    .map(d -> new ReplaceOneModel<>(
+                            eq("name", d.getString("name")),
+                            d,
+                            new UpdateOptions().upsert(true)
+                    ))
+                    .collect(Collectors.toList())
+    );
 }
 
 }
