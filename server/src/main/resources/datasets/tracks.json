@@ -16,5 +16,17 @@
     "longitude": 44.055472,
     "latitude": -78.678482,
     "url": "http://canadiantiremotorsportpark.com/#section-driving-experiences"
+  },
+  {
+    "name": "Cayuga",
+    "longitude": 42.899118,
+    "latitude": -79.861290,
+    "url": "https://torontomotorsportspark.com/road-course/motorcycles/"
+  },
+  {
+    "name": "Calabogie",
+    "longitude": 45.301716,
+    "latitude": -76.674488,
+    "url": "http://www.calabogiemotorsports.com"
   }
 ]
